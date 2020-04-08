@@ -64,9 +64,9 @@ func mustDecodeCert(_name, password string) *x509.Certificate {
 
 // ListenAndServeTLS always returns a non-nil error. After Shutdown or
 // Close, the returned error is ErrServerClosed.
-func ListenAndServeTLS(addr, certFile, keyFile, appleCert, password string) {
+func ListenAndServeTLS(addr, certFile, keyFile, appleCert, password string) error {
 	flag.Parse()
-	fmt.Println("Server is listening http2 on port " + addr)
+	fmt.Println("Apn server is listening http2 on port " + addr)
 
 	mux := &http.ServeMux{}
 	mux.HandleFunc("/3/device/", iosHandler)
