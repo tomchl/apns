@@ -66,7 +66,6 @@ func mustDecodeCert(_name, password string) *x509.Certificate {
 // Close, the returned error is ErrServerClosed.
 func ListenAndServeTLS(addr, certFile, keyFile, appleCert, password string) {
 	flag.Parse()
-	confirm.LogError = log.Println
 	fmt.Println("Server is listening http2 on port " + addr)
 
 	mux := &http.ServeMux{}
@@ -84,11 +83,8 @@ func ListenAndServeTLS(addr, certFile, keyFile, appleCert, password string) {
 		},
 		ErrorLog: log.New(ioutil.Discard, "", 0),
 	}
-	err := server.ListenAndServeTLS(certFile, keyFile)
-
-	log.Fatal(err)
-
-	fmt.Println("Ended...")
+	defer fmt.Println("Ended...")
+	return server.ListenAndServeTLS(certFile, keyFile)
 }
 
 /*
