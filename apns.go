@@ -34,12 +34,24 @@ func iosHandler(w http.ResponseWriter, r *http.Request) {
 		BaseURL:       notification.BaseURL,
 		Platform:      confirmrequest.Platform,
 		Token:         confirmrequest.NotificationToken}
+	if notification.ResponseCode != 0 {
+		w.WriteHeader(notification.ResponseCode)
+	}
+	if notification.ResponseError != "" {
+		enc := json.NewEncoder(w)
+		if err := enc.Encode(response{
+			Reason: notification.ResponseError}); err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 type notification struct {
 	NotificationToken string
 	BaseURL           string
 	ApplicationID     uint64
+	ResponseCode      int
+	ResponseError     string
 }
 
 type confirmrequest struct {
@@ -81,6 +93,10 @@ func ListenAndServeTLS(addr, certFile, keyFile, appleCert, password string) erro
 		ErrorLog: log.New(ioutil.Discard, "", 0),
 	}
 	return server.ListenAndServeTLS(certFile, keyFile)
+}
+
+type response struct {
+	Reason string
 }
 
 /*
