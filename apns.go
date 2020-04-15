@@ -29,11 +29,14 @@ func iosHandler(w http.ResponseWriter, r *http.Request) {
 
 	confirmrequest := confirmrequest{notification.ApplicationID, notification.NotificationToken, "Ios"}
 
-	confirm.Channel <- confirm.Payload{
-		ApplicationId: confirmrequest.ApplicationID,
-		BaseURL:       notification.BaseURL,
-		Platform:      confirmrequest.Platform,
-		Token:         confirmrequest.NotificationToken}
+	if isSuccessCode(notification.ResponseCode) &&
+		notification.ResponseError == "" {
+		confirm.Channel <- confirm.Payload{
+			ApplicationId: confirmrequest.ApplicationID,
+			BaseURL:       notification.BaseURL,
+			Platform:      confirmrequest.Platform,
+			Token:         confirmrequest.NotificationToken}
+	}
 	if notification.ResponseCode != 0 {
 		w.WriteHeader(notification.ResponseCode)
 	}
@@ -44,6 +47,10 @@ func iosHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 	}
+}
+
+func isSuccessCode(i int) bool {
+	return i >= 200 && i <= 300
 }
 
 type notification struct {
