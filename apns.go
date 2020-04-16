@@ -8,24 +8,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/martindrlik/org/confirm"
-	"go.uber.org/zap"
 	"golang.org/x/crypto/pkcs12"
 )
-
-type ignoreHTTPWriter struct {
-	logger *zap.SugaredLogger
-}
-
-func (fw *ignoreHTTPWriter) Write(p []byte) (n int, err error) {
-	if !strings.HasPrefix(string(p), "http:") {
-		fw.logger.Errorw(string(p))
-		return len(p), nil
-	}
-	return len(p), nil
-}
 
 func iosHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -104,10 +90,6 @@ func ListenAndServeTLS(addr, certFile, keyFile, appleCert, password string) erro
 	pool := x509.NewCertPool()
 	pool.AddCert(mustDecodeCert(appleCert, password))
 
-	logger := zap.NewExample()
-	defer logger.Sync()
-	sugar := logger.Sugar()
-
 	server := &http.Server{
 		Addr:    addr,
 		Handler: mux,
@@ -116,7 +98,6 @@ func ListenAndServeTLS(addr, certFile, keyFile, appleCert, password string) erro
 			ClientCAs:  pool,
 		},
 		//ErrorLog: log.New(ioutil.Discard, "", 0),
-		ErrorLog: log.New(&ignoreHTTPWriter{sugar}, "", 0),
 	}
 	return server.ListenAndServeTLS(certFile, keyFile)
 }
