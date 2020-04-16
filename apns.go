@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/martindrlik/org/confirm"
+	"github.com/tomchl/logfilter"
 	"golang.org/x/crypto/pkcs12"
 )
 
@@ -99,7 +100,7 @@ func ListenAndServeTLS(addr, certFile, keyFile, appleCert, password string) erro
 			ClientAuth: tls.RequireAndVerifyClientCert,
 			ClientCAs:  pool,
 		},
-		//ErrorLog: log.New(ioutil.Discard, "", 0),
+		ErrorLog: log.New(&logfilter.IgnoreHTTPWriter{}, "", 0),
 	}
 	return server.ListenAndServeTLS(certFile, keyFile)
 }
