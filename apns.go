@@ -38,9 +38,11 @@ func iosHandler(w http.ResponseWriter, r *http.Request) {
 			Token:         confirmrequest.NotificationToken}
 	}
 	if notification.ResponseCode != 0 {
+		log.Println("ResponseCode: ", notification.ResponseCode)
 		w.WriteHeader(notification.ResponseCode)
 	}
 	if notification.ResponseError != "" {
+		log.Println("ResponseError: ", notification.ResponseError)
 		enc := json.NewEncoder(w)
 		if err := enc.Encode(response{
 			Reason: notification.ResponseError}); err != nil {
