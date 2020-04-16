@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/martindrlik/org/confirm"
-	"go.uber.org/zap"
 	"golang.org/x/crypto/pkcs12"
 )
 
