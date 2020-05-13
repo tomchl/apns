@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"flag"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -21,9 +22,10 @@ func iosHandler(w http.ResponseWriter, r *http.Request) {
 
 	var notification notification
 	err := dec.Decode(&notification)
-	if err != nil {
+	if err != nil && err != io.EOF {
 		panic(err)
 	}
+
 	log.Println("AppId from body: ", notification.ApplicationID)
 	log.Println("Host: ", notification.BaseURL)
 	log.Println("NotifToken: ", notification.NotificationToken)
