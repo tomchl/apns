@@ -56,7 +56,7 @@ func iosHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func isSuccessCode(i int) bool {
-	return i >= 200 && i <= 300
+	return i == 0 || i >= 200 && i <= 300
 }
 
 type notification struct {
