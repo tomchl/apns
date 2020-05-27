@@ -10,18 +10,25 @@ import (
 	"net/http"
 
 	"github.com/martindrlik/org/confirm"
+	"github.com/martindrlik/org/notquery"
 	"github.com/tomchl/logfilter"
 	"golang.org/x/crypto/pkcs12"
 )
 
+const sendHandlerPattern = "/3/device/"
+
 func iosHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-
-	dec := json.NewDecoder(r.Body)
-
-	var notification notification
-	err := dec.Decode(&notification)
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Print(err)
+		return
+	}
+	deviceToken := r.URL.Path[len(sendHandlerPattern):]
+	notquery.Add(deviceToken, body)
+	var notification notification
+	if err := json.Unmarshal(body, &notification); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Print(err)
 		return
@@ -36,7 +43,7 @@ func iosHandler(w http.ResponseWriter, r *http.Request) {
 	if isSuccessCode(notification.ResponseCode) &&
 		notification.ResponseError == "" {
 		confirm.Channel <- confirm.Payload{
-			ApplicationId: confirmrequest.ApplicationID,
+			ApplicationID: confirmrequest.ApplicationID,
 			BaseURL:       notification.BaseURL,
 			Platform:      confirmrequest.Platform,
 			Token:         confirmrequest.NotificationToken}
@@ -91,7 +98,7 @@ func mustDecodeCert(_name, password string) *x509.Certificate {
 func ListenAndServeTLS(addr, certFile, keyFile, appleCert, password string) error {
 	flag.Parse()
 	mux := &http.ServeMux{}
-	mux.HandleFunc("/3/device/", iosHandler)
+	mux.HandleFunc(sendHandlerPattern, iosHandler)
 
 	pool := x509.NewCertPool()
 	pool.AddCert(mustDecodeCert(appleCert, password))
