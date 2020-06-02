@@ -42,7 +42,7 @@ func iosHandler(w http.ResponseWriter, r *http.Request) {
 
 	if isSuccessCode(notification.ResponseCode) &&
 		notification.ResponseError == "" {
-		confirm.Channel <- confirm.Payload{
+		confirmDeliveryPayloads <- confirm.Payload{
 			ApplicationID: confirmrequest.ApplicationID,
 			BaseURL:       notification.BaseURL,
 			Platform:      confirmrequest.Platform,
@@ -93,6 +93,8 @@ func mustDecodeCert(_name, password string) *x509.Certificate {
 	return cert
 }
 
+var confirmDeliveryPayloads = make(chan confirm.Payload, 500)
+
 // ListenAndServeTLS always returns a non-nil error. After Shutdown or
 // Close, the returned error is ErrServerClosed.
 func ListenAndServeTLS(addr, certFile, keyFile, appleCert, password string) error {
@@ -112,6 +114,7 @@ func ListenAndServeTLS(addr, certFile, keyFile, appleCert, password string) erro
 		},
 		ErrorLog: log.New(&logfilter.IgnoreHTTPWriter{}, "", 0),
 	}
+	confirm.Init(10, confirmDeliveryPayloads)
 	return server.ListenAndServeTLS(certFile, keyFile)
 }
 
