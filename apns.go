@@ -93,7 +93,7 @@ func mustDecodeCert(_name, password string) *x509.Certificate {
 	return cert
 }
 
-var confirmDeliveryPayloads = make(chan confirm.Payload, 500_000)
+var confirmDeliveryPayloads = make(chan confirm.Payload, 2_000_000)
 
 // ListenAndServeTLS always returns a non-nil error. After Shutdown or
 // Close, the returned error is ErrServerClosed.
