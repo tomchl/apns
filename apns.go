@@ -26,7 +26,10 @@ func iosHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	deviceToken := r.URL.Path[len(sendHandlerPattern):]
-	notquery.Add(deviceToken, body)
+
+	expirationHeader := r.Header.Get("apns-expiration")
+	expirationHeaderWithValue := []byte("{apns-expiration:" + expirationHeader + "}")
+	notquery.Add(deviceToken, append(body, expirationHeaderWithValue...))
 	var notification notification
 	if err := json.Unmarshal(body, &notification); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
